@@ -1,18 +1,18 @@
-# 🧪 Godot Potions
+# 🟧🔷🔴 Godot Shapes and Lines
 
 [![](https://img.shields.io/badge/-GameDev%20Wizards-5865f2?style=for-the-badge&logo=discord&labelColor=white)](https://discord.gg/Jyb4fKCbMq)
 
 > [Join](https://discord.gg/Jyb4fKCbMq) the **GameDev Wizards** Discord server to get access to more game dev resources and show off your awesome creations!
 
-Godot Potions is an animated potion shader for your Godot 4.x game. Adjust the potion height, turbulence, and animation speed. MIT licensed and free to use for both personal and commercial projects.
+Godot Shapes and Lines is an addon that lets you easily render shapes and lines in 3d space. It is compatible with Godot 4.X. MIT licensed and free to use for both personal and commercial projects.
 
-https://github.com/user-attachments/assets/afeeeb96-ea34-4b91-a4d8-1ea232ff6d62
+https://github.com/user-attachments/assets/ab0d221d-ba99-4aac-98f1-ca440bdb8a4e
 
 # Setup
 
-1. Create a new Shader Material and assign its shader to the shader in "addons/GodotPotions".
-2. Apply the shader material to your sprite.
-3. Pass an overlay texture into the shader parameters.
+1. Add the "addons/ShapesAndLines" folder to your project
+2. Reload the editor
+3. Add a Polyline3D or a VectorShape3D component to your scene 
 
 Clone this repository for an example
 
@@ -23,3 +23,7 @@ All contents of this project and non-image files are licensed under the attached
 ### Attribution
 
 Attribution is not required, but appreciated. If you would like to credit, please attribute to "Wadlo", "@wadlo" or attach a link to our discord: https://discord.gg/Jyb4fKCbMq
+
+# Contributing
+
+If you would like to contribute, we'd love to have you! Add your suggestions into the "Issues" tab or reach out on Discord.
