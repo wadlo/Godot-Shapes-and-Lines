@@ -1,0 +1,831 @@
+[gd_scene load_steps=38 format=4 uid="uid://cc0aq386efdee"]
+
+[ext_resource type="Script" path="res://addons/ShapesAndLines/VectorShape3D.gd" id="4_1bbda"]
+[ext_resource type="Script" path="res://Demo/demo_camera_animation.gd" id="4_l381x"]
+[ext_resource type="Script" path="res://addons/ShapesAndLines/Polyline3D.gd" id="4_wvuin"]
+[ext_resource type="Script" path="res://Demo/demo_animation.gd" id="5_wyyr3"]
+
+[sub_resource type="Shader" id="Shader_psiys"]
+code = "shader_type spatial;
+render_mode cull_front, unshaded;
+
+uniform float width = 10.0;
+uniform bool debug = false;
+
+vec2 rotate90Degrees(vec2 v) {
+    return vec2(-v.y, v.x);
+}
+
+void vertex() {
+	vec4 clip_position = PROJECTION_MATRIX * (MODELVIEW_MATRIX * vec4(VERTEX, 1.0));
+	
+	vec4 position_with_offset = PROJECTION_MATRIX * (MODELVIEW_MATRIX * (vec4(VERTEX, 1.0) + vec4((2.*UV.x-.5) * NORMAL/100.0, 0.)));
+	vec2 offset_direction = position_with_offset.xy / position_with_offset.w - clip_position.xy / clip_position.w;
+	
+	vec2 offset = (rotate90Degrees(normalize(offset_direction * VIEWPORT_SIZE))) / VIEWPORT_SIZE * clip_position.w * width * 2.0;
+	POSITION = clip_position + vec4(offset, 0., 0.);
+}
+
+void fragment() {
+	float xLengthOnScreen = length(vec2(1.0/dFdx(UV).x, 1.0/dFdy(UV).x));
+	
+	float uvXStretch = length(vec2(dFdx(UV).x, dFdy(UV).x));
+	float uvYStretch = length(vec2(dFdx(UV).y, dFdy(UV).y));
+	
+	ALBEDO = COLOR.rgb;
+	
+	if (COLOR.a < 1.0) {
+		ALPHA = COLOR.a;
+	}
+	
+	if (debug) {
+		float xStretch = 2.0 * uvXStretch;
+		float yStretch = 2.0 * uvYStretch;
+		float diagStretch = 2.0 * length(vec2(dFdx(UV).y + dFdx(UV).x, dFdy(UV).y + dFdy(UV).x));
+		
+		ALBEDO = vec3(UV.x, UV.y, 0.0);
+		if (UV.x < xStretch || UV.x > 1.0 - xStretch || UV.y < yStretch || UV.y > 1.0 - yStretch || abs(UV.x - (1.-UV.y)) < diagStretch/2.0) {
+			ALBEDO = vec3(1.,1.,1.);
+		}	
+	}
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vlbx6"]
+resource_local_to_scene = true
+render_priority = 0
+shader = SubResource("Shader_psiys")
+shader_parameter/width = 4.638
+shader_parameter/debug = false
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_ngwho"]
+_surfaces = [{
+"aabb": AABB(-44.5689, 0, -44.5689, 89.1388, 0.001, 89.1388),
+"attribute_data": PackedByteArray("vLy8/wAAAAAAAIA/vLy8/wAAgD8AAIA/vLy8/wAAAAAAAAAAvLy8/wAAgD8AAAAAvLy8/wAAAAAAAIA/vLy8/wAAgD8AAIA/vLy8/wAAAAAAAAAAvLy8/wAAgD8AAAAAvLy8/wAAAAAAAIA/vLy8/wAAgD8AAIA/vLy8/wAAAAAAAAAAvLy8/wAAgD8AAAAAvLy8/wAAAAAAAIA/vLy8/wAAgD8AAIA/vLy8/wAAAAAAAAAAvLy8/wAAgD8AAAAAvLy8/wAAAAAAAIA/vLy8/wAAgD8AAIA/vLy8/wAAAAAAAAAAvLy8/wAAgD8AAAAA"),
+"format": 34359742495,
+"index_count": 54,
+"index_data": PackedByteArray("AAABAAIAAgABAAMAAgADAAQABAADAAUABAAFAAYABgAFAAcABgAHAAgACAAHAAkACAAJAAoACgAJAAsACgALAAwADAALAA0ADAANAA4ADgANAA8ADgAPABAAEAAPABEAEAARABIAEgARABMA"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 20,
+"vertex_data": PackedByteArray("jkYyQgAAAACORjJClEcyQm8SgzqURzJCjkYyQgAAAACORjLClEcyQm8SgzqIRTLCjkYyQgAAAACORjLClEcyQm8SgzqIRTLCjkYywgAAAACORjLCiEUywm8SgzqIRTLCjkYywgAAAACORjLCiEUywm8SgzqIRTLCjkYywgAAAACORjJCiEUywm8SgzqURzJCjkYywgAAAACORjJCiEUywm8SgzqURzJCjkYyQgAAAACORjJClEcyQm8SgzqURzJCjkYyQgAAAACORjJClEcyQm8SgzqURzJCjkYyQgAAAACORjLClEcyQm8SgzqIRTLC//////9/AID//////38AgP//////fwCA//////9/AIAAAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//v/9//3//fwCA/3//f/9/AID/f/9//38AgP9//3//fwCA////f/9//7////9//3//v////3//f/+/////f/9//7///////38AgP//////fwCA//////9/AID//////38AgA==")
+}]
+
+[sub_resource type="Shader" id="Shader_87bc4"]
+code = "shader_type spatial;
+render_mode cull_front, unshaded;
+
+uniform float width = 10.0;
+uniform bool debug = false;
+
+vec2 rotate90Degrees(vec2 v) {
+    return vec2(-v.y, v.x);
+}
+
+void vertex() {
+	vec4 clip_position = PROJECTION_MATRIX * (MODELVIEW_MATRIX * vec4(VERTEX, 1.0));
+	
+	vec4 position_with_offset = PROJECTION_MATRIX * (MODELVIEW_MATRIX * (vec4(VERTEX, 1.0) + vec4((2.*UV.x-.5) * NORMAL/100.0, 0.)));
+	vec2 offset_direction = position_with_offset.xy / position_with_offset.w - clip_position.xy / clip_position.w;
+	
+	vec2 offset = (rotate90Degrees(normalize(offset_direction * VIEWPORT_SIZE))) / VIEWPORT_SIZE * clip_position.w * width * 2.0;
+	POSITION = clip_position + vec4(offset, 0., 0.);
+}
+
+void fragment() {
+	float xLengthOnScreen = length(vec2(1.0/dFdx(UV).x, 1.0/dFdy(UV).x));
+	
+	float uvXStretch = length(vec2(dFdx(UV).x, dFdy(UV).x));
+	float uvYStretch = length(vec2(dFdx(UV).y, dFdy(UV).y));
+	
+	ALBEDO = COLOR.rgb;
+	
+	if (COLOR.a < 1.0) {
+		ALPHA = COLOR.a;
+	}
+	
+	if (debug) {
+		float xStretch = 2.0 * uvXStretch;
+		float yStretch = 2.0 * uvYStretch;
+		float diagStretch = 2.0 * length(vec2(dFdx(UV).y + dFdx(UV).x, dFdy(UV).y + dFdy(UV).x));
+		
+		ALBEDO = vec3(UV.x, UV.y, 0.0);
+		if (UV.x < xStretch || UV.x > 1.0 - xStretch || UV.y < yStretch || UV.y > 1.0 - yStretch || abs(UV.x - (1.-UV.y)) < diagStretch/2.0) {
+			ALBEDO = vec3(1.,1.,1.);
+		}	
+	}
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_24txs"]
+resource_local_to_scene = true
+render_priority = 0
+shader = SubResource("Shader_87bc4")
+shader_parameter/width = 4.638
+shader_parameter/debug = false
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_j3l8r"]
+_surfaces = [{
+"aabb": AABB(-43.4977, 0, -43.4977, 86.9964, 0.001, 86.9964),
+"attribute_data": PackedByteArray("vLy8/wAAAAAAAIA/vLy8/wAAgD8AAIA/vLy8/wAAAAAAAAAAvLy8/wAAgD8AAAAAvLy8/wAAAAAAAIA/vLy8/wAAgD8AAIA/vLy8/wAAAAAAAAAAvLy8/wAAgD8AAAAAvLy8/wAAAAAAAIA/vLy8/wAAgD8AAIA/vLy8/wAAAAAAAAAAvLy8/wAAgD8AAAAAvLy8/wAAAAAAAIA/vLy8/wAAgD8AAIA/vLy8/wAAAAAAAAAAvLy8/wAAgD8AAAAAvLy8/wAAAAAAAIA/vLy8/wAAgD8AAIA/vLy8/wAAAAAAAAAAvLy8/wAAgD8AAAAA"),
+"format": 34359742495,
+"index_count": 54,
+"index_data": PackedByteArray("AAABAAIAAgABAAMAAgADAAQABAADAAUABAAFAAYABgAFAAcABgAHAAgACAAHAAkACAAJAAoACgAJAAsACgALAAwADAALAA0ADAANAA4ADgANAA8ADgAPABAAEAAPABEAEAARABIAEgARABMA"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 20,
+"vertex_data": PackedByteArray("pf0tQgAAAACl/S1Cq/4tQm8Sgzqr/i1Cpf0tQgAAAACl/S3Cq/4tQm8Sgzqf/C3Cpf0tQgAAAACl/S3Cq/4tQm8Sgzqf/C3Cpf0twgAAAACl/S3Cn/wtwm8Sgzqf/C3Cpf0twgAAAACl/S3Cn/wtwm8Sgzqf/C3Cpf0twgAAAACl/S1Cn/wtwm8Sgzqr/i1Cpf0twgAAAACl/S1Cn/wtwm8Sgzqr/i1Cpf0tQgAAAACl/S1Cq/4tQm8Sgzqr/i1Cpf0tQgAAAACl/S1Cq/4tQm8Sgzqr/i1Cpf0tQgAAAACl/S3Cq/4tQm8Sgzqf/C3C//////9/AID//////38AgP//////fwCA//////9/AIAAAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//v/9//3//fwCA/3//f/9/AID/f/9//38AgP9//3//fwCA////f/9//7////9//3//v////3//f/+/////f/9//7///////38AgP//////fwCA//////9/AID//////38AgA==")
+}]
+
+[sub_resource type="Shader" id="Shader_si57i"]
+code = "shader_type spatial;
+render_mode cull_front, unshaded;
+
+uniform float width = 10.0;
+uniform bool debug = false;
+
+vec2 rotate90Degrees(vec2 v) {
+    return vec2(-v.y, v.x);
+}
+
+void vertex() {
+	vec4 clip_position = PROJECTION_MATRIX * (MODELVIEW_MATRIX * vec4(VERTEX, 1.0));
+	
+	vec4 position_with_offset = PROJECTION_MATRIX * (MODELVIEW_MATRIX * (vec4(VERTEX, 1.0) + vec4((2.*UV.x-.5) * NORMAL/100.0, 0.)));
+	vec2 offset_direction = position_with_offset.xy / position_with_offset.w - clip_position.xy / clip_position.w;
+	
+	vec2 offset = (rotate90Degrees(normalize(offset_direction * VIEWPORT_SIZE))) / VIEWPORT_SIZE * clip_position.w * width * 2.0;
+	POSITION = clip_position + vec4(offset, 0., 0.);
+}
+
+void fragment() {
+	float xLengthOnScreen = length(vec2(1.0/dFdx(UV).x, 1.0/dFdy(UV).x));
+	
+	float uvXStretch = length(vec2(dFdx(UV).x, dFdy(UV).x));
+	float uvYStretch = length(vec2(dFdx(UV).y, dFdy(UV).y));
+	
+	ALBEDO = COLOR.rgb;
+	
+	if (COLOR.a < 1.0) {
+		ALPHA = COLOR.a;
+	}
+	
+	if (debug) {
+		float xStretch = 2.0 * uvXStretch;
+		float yStretch = 2.0 * uvYStretch;
+		float diagStretch = 2.0 * length(vec2(dFdx(UV).y + dFdx(UV).x, dFdy(UV).y + dFdy(UV).x));
+		
+		ALBEDO = vec3(UV.x, UV.y, 0.0);
+		if (UV.x < xStretch || UV.x > 1.0 - xStretch || UV.y < yStretch || UV.y > 1.0 - yStretch || abs(UV.x - (1.-UV.y)) < diagStretch/2.0) {
+			ALBEDO = vec3(1.,1.,1.);
+		}	
+	}
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7pf85"]
+resource_local_to_scene = true
+render_priority = 0
+shader = SubResource("Shader_si57i")
+shader_parameter/width = 4.638
+shader_parameter/debug = false
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_e2jsl"]
+_surfaces = [{
+"aabb": AABB(-44.5689, 0, -44.5689, 89.1388, 0.001, 89.1388),
+"attribute_data": PackedByteArray("vLy8/wAAAAAAAIA/vLy8/wAAgD8AAIA/vLy8/wAAAAAAAAAAvLy8/wAAgD8AAAAAvLy8/wAAAAAAAIA/vLy8/wAAgD8AAIA/vLy8/wAAAAAAAAAAvLy8/wAAgD8AAAAAvLy8/wAAAAAAAIA/vLy8/wAAgD8AAIA/vLy8/wAAAAAAAAAAvLy8/wAAgD8AAAAAvLy8/wAAAAAAAIA/vLy8/wAAgD8AAIA/vLy8/wAAAAAAAAAAvLy8/wAAgD8AAAAAvLy8/wAAAAAAAIA/vLy8/wAAgD8AAIA/vLy8/wAAAAAAAAAAvLy8/wAAgD8AAAAA"),
+"format": 34359742495,
+"index_count": 54,
+"index_data": PackedByteArray("AAABAAIAAgABAAMAAgADAAQABAADAAUABAAFAAYABgAFAAcABgAHAAgACAAHAAkACAAJAAoACgAJAAsACgALAAwADAALAA0ADAANAA4ADgANAA8ADgAPABAAEAAPABEAEAARABIAEgARABMA"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 20,
+"vertex_data": PackedByteArray("jkYyQgAAAACORjJClEcyQm8SgzqURzJCjkYyQgAAAACORjLClEcyQm8SgzqIRTLCjkYyQgAAAACORjLClEcyQm8SgzqIRTLCjkYywgAAAACORjLCiEUywm8SgzqIRTLCjkYywgAAAACORjLCiEUywm8SgzqIRTLCjkYywgAAAACORjJCiEUywm8SgzqURzJCjkYywgAAAACORjJCiEUywm8SgzqURzJCjkYyQgAAAACORjJClEcyQm8SgzqURzJCjkYyQgAAAACORjJClEcyQm8SgzqURzJCjkYyQgAAAACORjLClEcyQm8SgzqIRTLC//////9/AID//////38AgP//////fwCA//////9/AIAAAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//v/9//3//fwCA/3//f/9/AID/f/9//38AgP9//3//fwCA////f/9//7////9//3//v////3//f/+/////f/9//7///////38AgP//////fwCA//////9/AID//////38AgA==")
+}]
+
+[sub_resource type="Shader" id="Shader_7ohwd"]
+code = "shader_type spatial;
+render_mode cull_front, unshaded;
+
+uniform float width = 10.0;
+uniform bool debug = false;
+
+vec2 rotate90Degrees(vec2 v) {
+    return vec2(-v.y, v.x);
+}
+
+void vertex() {
+	vec4 clip_position = PROJECTION_MATRIX * (MODELVIEW_MATRIX * vec4(VERTEX, 1.0));
+	
+	vec4 position_with_offset = PROJECTION_MATRIX * (MODELVIEW_MATRIX * (vec4(VERTEX, 1.0) + vec4((2.*UV.x-.5) * NORMAL/100.0, 0.)));
+	vec2 offset_direction = position_with_offset.xy / position_with_offset.w - clip_position.xy / clip_position.w;
+	
+	vec2 offset = (rotate90Degrees(normalize(offset_direction * VIEWPORT_SIZE))) / VIEWPORT_SIZE * clip_position.w * width * 2.0;
+	POSITION = clip_position + vec4(offset, 0., 0.);
+}
+
+void fragment() {
+	float xLengthOnScreen = length(vec2(1.0/dFdx(UV).x, 1.0/dFdy(UV).x));
+	
+	float uvXStretch = length(vec2(dFdx(UV).x, dFdy(UV).x));
+	float uvYStretch = length(vec2(dFdx(UV).y, dFdy(UV).y));
+	
+	ALBEDO = COLOR.rgb;
+	
+	if (COLOR.a < 1.0) {
+		ALPHA = COLOR.a;
+	}
+	
+	if (debug) {
+		float xStretch = 2.0 * uvXStretch;
+		float yStretch = 2.0 * uvYStretch;
+		float diagStretch = 2.0 * length(vec2(dFdx(UV).y + dFdx(UV).x, dFdy(UV).y + dFdy(UV).x));
+		
+		ALBEDO = vec3(UV.x, UV.y, 0.0);
+		if (UV.x < xStretch || UV.x > 1.0 - xStretch || UV.y < yStretch || UV.y > 1.0 - yStretch || abs(UV.x - (1.-UV.y)) < diagStretch/2.0) {
+			ALBEDO = vec3(1.,1.,1.);
+		}	
+	}
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hi7qi"]
+resource_local_to_scene = true
+render_priority = 0
+shader = SubResource("Shader_7ohwd")
+shader_parameter/width = 4.0
+shader_parameter/debug = false
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_r2uuq"]
+_surfaces = [{
+"aabb": AABB(0, 0, 0, 400.001, 100.001, 0.001),
+"attribute_data": PackedByteArray("uu8A/wAAAAAAAIA/uu8A/wAAgD8AAIA/uu8A/wAAAAAAAAAAuu8A/wAAgD8AAAAAuu8A/wAAAAAAAIA/uu8A/wAAgD8AAIA/uu8A/wAAAAAAAAAAuu8A/wAAgD8AAAAAuu8A/wAAAAAAAIA/uu8A/wAAgD8AAIA/uu8A/wAAAAAAAAAAuu8A/wAAgD8AAAAAuu8A/wAAAAAAAIA/uu8A/wAAgD8AAIA/uu8A/wAAAAAAAAAAuu8A/wAAgD8AAAAA"),
+"format": 34359742495,
+"index_count": 42,
+"index_data": PackedByteArray("AAABAAIAAgABAAMAAgADAAQABAADAAUABAAFAAYABgAFAAcABgAHAAgACAAHAAkACAAJAAoACgAJAAsACgALAAwADAALAA0ADAANAA4ADgANAA8A"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 16,
+"vertex_data": PackedByteArray("AAAAAAAAyEIAAAAAbxKDOoMAyEJvEoM6AADIQgAAAAAAAAAAgwDIQm8SgzpvEoM6AADIQgAAAAAAAAAAgwDIQm8SgzpvEoM6AABIQwAAAAAAAAAAQgBIQ28SgzpvEoM6AABIQwAAAAAAAAAAQgBIQ28SgzpvEoM6AACWQwAAyEIAAAAAIQCWQ4MAyEJvEoM6AACWQwAAyEIAAAAAIQCWQ4MAyEJvEoM6AADIQwAAAAAAAAAAIQDIQ28SgzpvEoM6/7//P1RVqar/v/8/VFWpqv+//z9UVamq/7//P1RVqar///9//3//v////3//f/+/////f/9//7////9//3//v/+//79UVVTV/7//v1RVVNX/v/+/VFVU1f+//79UVVTV/7//P1RVqar/v/8/VFWpqv+//z9UVamq/7//P1RVqao=")
+}]
+
+[sub_resource type="Shader" id="Shader_jboxc"]
+code = "shader_type spatial;
+render_mode cull_front, unshaded;
+
+uniform float width = 10.0;
+uniform bool debug = false;
+
+vec2 rotate90Degrees(vec2 v) {
+    return vec2(-v.y, v.x);
+}
+
+void vertex() {
+	vec4 clip_position = PROJECTION_MATRIX * (MODELVIEW_MATRIX * vec4(VERTEX, 1.0));
+	
+	vec4 position_with_offset = PROJECTION_MATRIX * (MODELVIEW_MATRIX * (vec4(VERTEX, 1.0) + vec4((2.*UV.x-.5) * NORMAL/100.0, 0.)));
+	vec2 offset_direction = position_with_offset.xy / position_with_offset.w - clip_position.xy / clip_position.w;
+	
+	vec2 offset = (rotate90Degrees(normalize(offset_direction * VIEWPORT_SIZE))) / VIEWPORT_SIZE * clip_position.w * width * 2.0;
+	POSITION = clip_position + vec4(offset, 0., 0.);
+}
+
+void fragment() {
+	float xLengthOnScreen = length(vec2(1.0/dFdx(UV).x, 1.0/dFdy(UV).x));
+	
+	float uvXStretch = length(vec2(dFdx(UV).x, dFdy(UV).x));
+	float uvYStretch = length(vec2(dFdx(UV).y, dFdy(UV).y));
+	
+	ALBEDO = COLOR.rgb;
+	
+	if (COLOR.a < 1.0) {
+		ALPHA = COLOR.a;
+	}
+	
+	if (debug) {
+		float xStretch = 2.0 * uvXStretch;
+		float yStretch = 2.0 * uvYStretch;
+		float diagStretch = 2.0 * length(vec2(dFdx(UV).y + dFdx(UV).x, dFdy(UV).y + dFdy(UV).x));
+		
+		ALBEDO = vec3(UV.x, UV.y, 0.0);
+		if (UV.x < xStretch || UV.x > 1.0 - xStretch || UV.y < yStretch || UV.y > 1.0 - yStretch || abs(UV.x - (1.-UV.y)) < diagStretch/2.0) {
+			ALBEDO = vec3(1.,1.,1.);
+		}	
+	}
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_mj7li"]
+resource_local_to_scene = true
+render_priority = 0
+shader = SubResource("Shader_jboxc")
+shader_parameter/width = 19.538
+shader_parameter/debug = true
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_3dsv3"]
+_surfaces = [{
+"aabb": AABB(0, 0, 0, 400.001, 100.001, 0.001),
+"attribute_data": PackedByteArray("fn5+/wAAAAAAAIA/fn5+/wAAgD8AAIA/fn5+/wAAAAAAAAAAfn5+/wAAgD8AAAAAfn5+/wAAAAAAAIA/fn5+/wAAgD8AAIA/fn5+/wAAAAAAAAAAfn5+/wAAgD8AAAAAfn5+/wAAAAAAAIA/fn5+/wAAgD8AAIA/fn5+/wAAAAAAAAAAfn5+/wAAgD8AAAAAfn5+/wAAAAAAAIA/fn5+/wAAgD8AAIA/fn5+/wAAAAAAAAAAfn5+/wAAgD8AAAAA"),
+"format": 34359742495,
+"index_count": 42,
+"index_data": PackedByteArray("AAABAAIAAgABAAMAAgADAAQABAADAAUABAAFAAYABgAFAAcABgAHAAgACAAHAAkACAAJAAoACgAJAAsACgALAAwADAALAA0ADAANAA4ADgANAA8A"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 16,
+"vertex_data": PackedByteArray("AAAAAAAAyEIAAAAAbxKDOoMAyEJvEoM6AADIQgAAAAAAAAAAgwDIQm8SgzpvEoM6AADIQgAAAAAAAAAAgwDIQm8SgzpvEoM6AABIQwAAAAAAAAAAQgBIQ28SgzpvEoM6AABIQwAAAAAAAAAAQgBIQ28SgzpvEoM6AACWQwAAyEIAAAAAIQCWQ4MAyEJvEoM6AACWQwAAyEIAAAAAIQCWQ4MAyEJvEoM6AADIQwAAAAAAAAAAIQDIQ28SgzpvEoM6/7//P1RVqar/v/8/VFWpqv+//z9UVamq/7//P1RVqar///9//3//v////3//f/+/////f/9//7////9//3//v/+//79UVVTV/7//v1RVVNX/v/+/VFVU1f+//79UVVTV/7//P1RVqar/v/8/VFWpqv+//z9UVamq/7//P1RVqao=")
+}]
+
+[sub_resource type="Shader" id="Shader_bgtfk"]
+code = "shader_type spatial;
+render_mode cull_front, unshaded;
+
+uniform float width = 10.0;
+uniform bool debug = false;
+
+vec2 rotate90Degrees(vec2 v) {
+    return vec2(-v.y, v.x);
+}
+
+void vertex() {
+	vec4 clip_position = PROJECTION_MATRIX * (MODELVIEW_MATRIX * vec4(VERTEX, 1.0));
+	
+	vec4 position_with_offset = PROJECTION_MATRIX * (MODELVIEW_MATRIX * (vec4(VERTEX, 1.0) + vec4((2.*UV.x-.5) * NORMAL/100.0, 0.)));
+	vec2 offset_direction = position_with_offset.xy / position_with_offset.w - clip_position.xy / clip_position.w;
+	
+	vec2 offset = (rotate90Degrees(normalize(offset_direction * VIEWPORT_SIZE))) / VIEWPORT_SIZE * clip_position.w * width * 2.0;
+	POSITION = clip_position + vec4(offset, 0., 0.);
+}
+
+void fragment() {
+	float xLengthOnScreen = length(vec2(1.0/dFdx(UV).x, 1.0/dFdy(UV).x));
+	
+	float uvXStretch = length(vec2(dFdx(UV).x, dFdy(UV).x));
+	float uvYStretch = length(vec2(dFdx(UV).y, dFdy(UV).y));
+	
+	ALBEDO = COLOR.rgb;
+	
+	if (COLOR.a < 1.0) {
+		ALPHA = COLOR.a;
+	}
+	
+	if (debug) {
+		float xStretch = 2.0 * uvXStretch;
+		float yStretch = 2.0 * uvYStretch;
+		float diagStretch = 2.0 * length(vec2(dFdx(UV).y + dFdx(UV).x, dFdy(UV).y + dFdy(UV).x));
+		
+		ALBEDO = vec3(UV.x, UV.y, 0.0);
+		if (UV.x < xStretch || UV.x > 1.0 - xStretch || UV.y < yStretch || UV.y > 1.0 - yStretch || abs(UV.x - (1.-UV.y)) < diagStretch/2.0) {
+			ALBEDO = vec3(1.,1.,1.);
+		}	
+	}
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_88vns"]
+resource_local_to_scene = true
+render_priority = 0
+shader = SubResource("Shader_bgtfk")
+shader_parameter/width = 3.0
+shader_parameter/debug = false
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_yafu3"]
+_surfaces = [{
+"aabb": AABB(-38.75, 0, -33.5585, 77.501, 0.001, 67.118),
+"attribute_data": PackedByteArray("AOHt/wAAAAAAAIA/AOHt/wAAgD8AAIA/AOHt/wAAAAAAAAAAAOHt/wAAgD8AAAAAAOHt/wAAAAAAAIA/AOHt/wAAgD8AAIA/AOHt/wAAAAAAAAAAAOHt/wAAgD8AAAAAAOHt/wAAAAAAAIA/AOHt/wAAgD8AAIA/AOHt/wAAAAAAAAAAAOHt/wAAgD8AAAAAAOHt/wAAAAAAAIA/AOHt/wAAgD8AAIA/AOHt/wAAAAAAAAAAAOHt/wAAgD8AAAAAAOHt/wAAAAAAAIA/AOHt/wAAgD8AAIA/AOHt/wAAAAAAAAAAAOHt/wAAgD8AAAAAAOHt/wAAAAAAAIA/AOHt/wAAgD8AAIA/AOHt/wAAAAAAAAAAAOHt/wAAgD8AAAAAAOHt/wAAAAAAAIA/AOHt/wAAgD8AAIA/AOHt/wAAAAAAAAAAAOHt/wAAgD8AAAAA"),
+"format": 34359742495,
+"index_count": 78,
+"index_data": PackedByteArray("AAABAAIAAgABAAMAAgADAAQABAADAAUABAAFAAYABgAFAAcABgAHAAgACAAHAAkACAAJAAoACgAJAAsACgALAAwADAALAA0ADAANAA4ADgANAA8ADgAPABAAEAAPABEAEAARABIAEgARABMAEgATABQAFAATABUAFAAVABYAFgAVABcAFgAXABgAGAAXABkAGAAZABoAGgAZABsA"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 28,
+"vertex_data": PackedByteArray("AACbQQAAAADnOwZCDAKbQW8SgzrtPAZCAAAbQgAAAAAJ+ConBgEbQm8SgzpvEoM6AAAbQgAAAAAJ+ConBgEbQm8SgzpvEoM6AACbQQAAAADnOwbCDAKbQW8SgzrhOgbCAACbQQAAAADnOwbCDAKbQW8SgzrhOgbCAACbwQAAAADnOwbC9P2awW8SgzrhOgbCAACbwQAAAADnOwbC9P2awW8SgzrhOgbCAAAbwgAAAAATOgCo+v4awm8SgzpvEoM6AAAbwgAAAAATOgCo+v4awm8SgzpvEoM6AACbwQAAAADnOwZC9P2awW8SgzrtPAZCAACbwQAAAADnOwZC9P2awW8SgzrtPAZCAACbQQAAAADnOwZCDAKbQW8SgzrtPAZCAACbQQAAAADnOwZCDAKbQW8SgzrtPAZCAAAbQgAAAACObVApBgEbQm8SgzpvEoM6//8l0aymgJ7//yXRrKaAnv//JdGspoCe//8l0aymgJ4AACXRUlmAngAAJdFSWYCeAAAl0VJZgJ4AACXRUlmAngAA/3//f/+/AAD/f/9//78AAP9//3//vwAA/3//f/+/JVH/f6ymgJ4lUf9/rKaAniVR/3+spoCeJVH/f6ymgJ7Zrv9/UlmAntmu/39SWYCe2a7/f1JZgJ7Zrv9/UlmAnv///3//f/+/////f/9//7////9//3//v////3//f/+///8l0aymgJ7//yXRrKaAnv//JdGspoCe//8l0aymgJ4=")
+}]
+
+[sub_resource type="Shader" id="Shader_5hueq"]
+code = "shader_type spatial;
+render_mode cull_front, unshaded;
+
+uniform float width = 10.0;
+uniform bool debug = false;
+
+vec2 rotate90Degrees(vec2 v) {
+    return vec2(-v.y, v.x);
+}
+
+void vertex() {
+	vec4 clip_position = PROJECTION_MATRIX * (MODELVIEW_MATRIX * vec4(VERTEX, 1.0));
+	
+	vec4 position_with_offset = PROJECTION_MATRIX * (MODELVIEW_MATRIX * (vec4(VERTEX, 1.0) + vec4((2.*UV.x-.5) * NORMAL/100.0, 0.)));
+	vec2 offset_direction = position_with_offset.xy / position_with_offset.w - clip_position.xy / clip_position.w;
+	
+	vec2 offset = (rotate90Degrees(normalize(offset_direction * VIEWPORT_SIZE))) / VIEWPORT_SIZE * clip_position.w * width * 2.0;
+	POSITION = clip_position + vec4(offset, 0., 0.);
+}
+
+void fragment() {
+	float xLengthOnScreen = length(vec2(1.0/dFdx(UV).x, 1.0/dFdy(UV).x));
+	
+	float uvXStretch = length(vec2(dFdx(UV).x, dFdy(UV).x));
+	float uvYStretch = length(vec2(dFdx(UV).y, dFdy(UV).y));
+	
+	ALBEDO = COLOR.rgb;
+	
+	if (COLOR.a < 1.0) {
+		ALPHA = COLOR.a;
+	}
+	
+	if (debug) {
+		float xStretch = 2.0 * uvXStretch;
+		float yStretch = 2.0 * uvYStretch;
+		float diagStretch = 2.0 * length(vec2(dFdx(UV).y + dFdx(UV).x, dFdy(UV).y + dFdy(UV).x));
+		
+		ALBEDO = vec3(UV.x, UV.y, 0.0);
+		if (UV.x < xStretch || UV.x > 1.0 - xStretch || UV.y < yStretch || UV.y > 1.0 - yStretch || abs(UV.x - (1.-UV.y)) < diagStretch/2.0) {
+			ALBEDO = vec3(1.,1.,1.);
+		}	
+	}
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_imc7c"]
+resource_local_to_scene = true
+render_priority = 0
+shader = SubResource("Shader_5hueq")
+shader_parameter/width = 2.0
+shader_parameter/debug = false
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_lnfnl"]
+_surfaces = [{
+"aabb": AABB(-21.4558, 0, -24.775, 42.9126, 0.001, 49.551),
+"attribute_data": PackedByteArray("AOHt/wAAAAAAAIA/AOHt/wAAgD8AAIA/AOHt/wAAAAAAAAAAAOHt/wAAgD8AAAAAAOHt/wAAAAAAAIA/AOHt/wAAgD8AAIA/AOHt/wAAAAAAAAAAAOHt/wAAgD8AAAAAAOHt/wAAAAAAAIA/AOHt/wAAgD8AAIA/AOHt/wAAAAAAAAAAAOHt/wAAgD8AAAAAAOHt/wAAAAAAAIA/AOHt/wAAgD8AAIA/AOHt/wAAAAAAAAAAAOHt/wAAgD8AAAAAAOHt/wAAAAAAAIA/AOHt/wAAgD8AAIA/AOHt/wAAAAAAAAAAAOHt/wAAgD8AAAAAAOHt/wAAAAAAAIA/AOHt/wAAgD8AAIA/AOHt/wAAAAAAAAAAAOHt/wAAgD8AAAAAAOHt/wAAAAAAAIA/AOHt/wAAgD8AAIA/AOHt/wAAAAAAAAAAAOHt/wAAgD8AAAAA"),
+"format": 34359742495,
+"index_count": 78,
+"index_data": PackedByteArray("AAABAAIAAgABAAMAAgADAAQABAADAAUABAAFAAYABgAFAAcABgAHAAgACAAHAAkACAAJAAoACgAJAAsACgALAAwADAALAA0ADAANAA4ADgANAA8ADgAPABAAEAAPABEAEAARABIAEgARABMAEgATABQAFAATABUAFAAVABYAFgAVABcAFgAXABgAGAAXABkAGAAZABoAGgAZABsA"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 28,
+"vertex_data": PackedByteArray("AAAAAAAAAAAzM8ZBbxKDOm8Sgzo/NcZBeqWrQQAAAAAzM0ZBhqerQW8SgzpMN0ZBeqWrQQAAAAAzM0ZBhqerQW8SgzpMN0ZBeqWrQQAAAAAzM0bBhqerQW8SgzoaL0bBeqWrQQAAAAAzM0bBhqerQW8SgzoaL0bBr55aJwAAAAAzM8bBbxKDOm8SgzonMcbBr55aJwAAAAAzM8bBbxKDOm8SgzonMcbBeqWrwQAAAAAzM0bBbqOrwW8SgzoaL0bBeqWrwQAAAAAzM0bBbqOrwW8SgzoaL0bBeqWrwQAAAAAzM0ZBbqOrwW8SgzpMN0ZBeqWrwQAAAAAzM0ZBbqOrwW8SgzpMN0ZBr57apwAAAAAzM8ZBbxKDOm8Sgzo/NcZBr57apwAAAAAzM8ZBbxKDOm8Sgzo/NcZBeqWrQQAAAAAzM0ZBhqerQW8SgzpMN0ZB///Zrqym1LT//9murKbUtP//2a6sptS0///Zrqym1LT//////38AgP//////fwCA//////9/AID//////38AgAAA2a5SWdS0AADZrlJZ1LQAANmuUlnUtAAA2a5SWdS02S7/f6ym1LTZLv9/rKbUtNku/3+sptS02S7/f6ym1LT/f/9//38AgP9//3//fwCA/3//f/9/AID/f/9//38AgCXR/39SWdS0JdH/f1JZ1LQl0f9/UlnUtCXR/39SWdS0///Zrqym1LT//9murKbUtP//2a6sptS0///Zrqym1LQ=")
+}]
+
+[sub_resource type="Shader" id="Shader_f2mps"]
+code = "shader_type spatial;
+render_mode cull_front, unshaded;
+
+uniform float width = 10.0;
+uniform bool debug = false;
+
+vec2 rotate90Degrees(vec2 v) {
+    return vec2(-v.y, v.x);
+}
+
+void vertex() {
+	vec4 clip_position = PROJECTION_MATRIX * (MODELVIEW_MATRIX * vec4(VERTEX, 1.0));
+	
+	vec4 position_with_offset = PROJECTION_MATRIX * (MODELVIEW_MATRIX * (vec4(VERTEX, 1.0) + vec4((2.*UV.x-.5) * NORMAL/100.0, 0.)));
+	vec2 offset_direction = position_with_offset.xy / position_with_offset.w - clip_position.xy / clip_position.w;
+	
+	vec2 offset = (rotate90Degrees(normalize(offset_direction * VIEWPORT_SIZE))) / VIEWPORT_SIZE * clip_position.w * width * 2.0;
+	POSITION = clip_position + vec4(offset, 0., 0.);
+}
+
+void fragment() {
+	float xLengthOnScreen = length(vec2(1.0/dFdx(UV).x, 1.0/dFdy(UV).x));
+	
+	float uvXStretch = length(vec2(dFdx(UV).x, dFdy(UV).x));
+	float uvYStretch = length(vec2(dFdx(UV).y, dFdy(UV).y));
+	
+	ALBEDO = COLOR.rgb;
+	
+	if (COLOR.a < 1.0) {
+		ALPHA = COLOR.a;
+	}
+	
+	if (debug) {
+		float xStretch = 2.0 * uvXStretch;
+		float yStretch = 2.0 * uvYStretch;
+		float diagStretch = 2.0 * length(vec2(dFdx(UV).y + dFdx(UV).x, dFdy(UV).y + dFdy(UV).x));
+		
+		ALBEDO = vec3(UV.x, UV.y, 0.0);
+		if (UV.x < xStretch || UV.x > 1.0 - xStretch || UV.y < yStretch || UV.y > 1.0 - yStretch || abs(UV.x - (1.-UV.y)) < diagStretch/2.0) {
+			ALBEDO = vec3(1.,1.,1.);
+		}	
+	}
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_d3uhu"]
+resource_local_to_scene = true
+render_priority = 0
+shader = SubResource("Shader_f2mps")
+shader_parameter/width = 1.0
+shader_parameter/debug = false
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_8xgh2"]
+_surfaces = [{
+"aabb": AABB(-29.0692, 0, -29.0692, 58.1394, 0.001, 58.1394),
+"attribute_data": PackedByteArray("7QAE/wAAAAAAAIA/7QAE/wAAgD8AAIA/7QAE/wAAAAAAAAAA7QAE/wAAgD8AAAAA7QAE/wAAAAAAAIA/7QAE/wAAgD8AAIA/7QAE/wAAAAAAAAAA7QAE/wAAgD8AAAAA7QAE/wAAAAAAAIA/7QAE/wAAgD8AAIA/7QAE/wAAAAAAAAAA7QAE/wAAgD8AAAAA7QAE/wAAAAAAAIA/7QAE/wAAgD8AAIA/7QAE/wAAAAAAAAAA7QAE/wAAgD8AAAAA7QAE/wAAAAAAAIA/7QAE/wAAgD8AAIA/7QAE/wAAAAAAAAAA7QAE/wAAgD8AAAAA"),
+"format": 34359742495,
+"index_count": 54,
+"index_data": PackedByteArray("AAABAAIAAgABAAMAAgADAAQABAADAAUABAAFAAYABgAFAAcABgAHAAgACAAHAAkACAAJAAoACgAJAAsACgALAAwADAALAA0ADAANAA4ADgANAA8ADgAPABAAEAAPABEAEAARABIAEgARABMA"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 20,
+"vertex_data": PackedByteArray("uY3oQQAAAAC5jehBxY/oQW8SgzrFj+hBuY3oQQAAAAC5jejBxY/oQW8Sgzqti+jBuY3oQQAAAAC5jejBxY/oQW8Sgzqti+jBuY3owQAAAAC5jejBrYvowW8Sgzqti+jBuY3owQAAAAC5jejBrYvowW8Sgzqti+jBuY3owQAAAAC5jehBrYvowW8SgzrFj+hBuY3owQAAAAC5jehBrYvowW8SgzrFj+hBuY3oQQAAAAC5jehBxY/oQW8SgzrFj+hBuY3oQQAAAAC5jehBxY/oQW8SgzrFj+hBuY3oQQAAAAC5jejBxY/oQW8Sgzqti+jB//////9/AID//////38AgP//////fwCA//////9/AIAAAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//v/9//3//fwCA/3//f/9/AID/f/9//38AgP9//3//fwCA////f/9//7////9//3//v////3//f/+/////f/9//7///////38AgP//////fwCA//////9/AID//////38AgA==")
+}]
+
+[sub_resource type="Shader" id="Shader_yujoy"]
+code = "shader_type spatial;
+render_mode cull_front, unshaded;
+
+uniform float width = 10.0;
+uniform bool debug = false;
+
+vec2 rotate90Degrees(vec2 v) {
+    return vec2(-v.y, v.x);
+}
+
+void vertex() {
+	vec4 clip_position = PROJECTION_MATRIX * (MODELVIEW_MATRIX * vec4(VERTEX, 1.0));
+	
+	vec4 position_with_offset = PROJECTION_MATRIX * (MODELVIEW_MATRIX * (vec4(VERTEX, 1.0) + vec4((2.*UV.x-.5) * NORMAL/100.0, 0.)));
+	vec2 offset_direction = position_with_offset.xy / position_with_offset.w - clip_position.xy / clip_position.w;
+	
+	vec2 offset = (rotate90Degrees(normalize(offset_direction * VIEWPORT_SIZE))) / VIEWPORT_SIZE * clip_position.w * width * 2.0;
+	POSITION = clip_position + vec4(offset, 0., 0.);
+}
+
+void fragment() {
+	float xLengthOnScreen = length(vec2(1.0/dFdx(UV).x, 1.0/dFdy(UV).x));
+	
+	float uvXStretch = length(vec2(dFdx(UV).x, dFdy(UV).x));
+	float uvYStretch = length(vec2(dFdx(UV).y, dFdy(UV).y));
+	
+	ALBEDO = COLOR.rgb;
+	
+	if (COLOR.a < 1.0) {
+		ALPHA = COLOR.a;
+	}
+	
+	if (debug) {
+		float xStretch = 2.0 * uvXStretch;
+		float yStretch = 2.0 * uvYStretch;
+		float diagStretch = 2.0 * length(vec2(dFdx(UV).y + dFdx(UV).x, dFdy(UV).y + dFdy(UV).x));
+		
+		ALBEDO = vec3(UV.x, UV.y, 0.0);
+		if (UV.x < xStretch || UV.x > 1.0 - xStretch || UV.y < yStretch || UV.y > 1.0 - yStretch || abs(UV.x - (1.-UV.y)) < diagStretch/2.0) {
+			ALBEDO = vec3(1.,1.,1.);
+		}	
+	}
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_qwgui"]
+resource_local_to_scene = true
+render_priority = 0
+shader = SubResource("Shader_yujoy")
+shader_parameter/width = 1.0
+shader_parameter/debug = false
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_x0hk1"]
+_surfaces = [{
+"aabb": AABB(-15.4467, 0, -15.4467, 30.8944, 0.001, 30.8944),
+"attribute_data": PackedByteArray("/dHU/wAAAAAAAIA//dHU/wAAgD8AAIA//dHU/wAAAAAAAAAA/dHU/wAAgD8AAAAA/dHU/wAAAAAAAIA//dHU/wAAgD8AAIA//dHU/wAAAAAAAAAA/dHU/wAAgD8AAAAA/dHU/wAAAAAAAIA//dHU/wAAgD8AAIA//dHU/wAAAAAAAAAA/dHU/wAAgD8AAAAA/dHU/wAAAAAAAIA//dHU/wAAgD8AAIA//dHU/wAAAAAAAAAA/dHU/wAAgD8AAAAA/dHU/wAAAAAAAIA//dHU/wAAgD8AAIA//dHU/wAAAAAAAAAA/dHU/wAAgD8AAAAA"),
+"format": 34359742495,
+"index_count": 54,
+"index_data": PackedByteArray("AAABAAIAAgABAAMAAgADAAQABAADAAUABAAFAAYABgAFAAcABgAHAAgACAAHAAkACAAJAAoACgAJAAsACgALAAwADAALAA0ADAANAA4ADgANAA8ADgAPABAAEAAPABEAEAARABIAEgARABMA"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 20,
+"vertex_data": PackedByteArray("ryV3QQAAAACvJXdByCl3QW8SgzrIKXdBryV3QQAAAACvJXfByCl3QW8SgzqWIXfBryV3QQAAAACvJXfByCl3QW8SgzqWIXfBryV3wQAAAACvJXfBliF3wW8SgzqWIXfBryV3wQAAAACvJXfBliF3wW8SgzqWIXfBryV3wQAAAACvJXdBliF3wW8SgzrIKXdBryV3wQAAAACvJXdBliF3wW8SgzrIKXdBryV3QQAAAACvJXdByCl3QW8SgzrIKXdBryV3QQAAAACvJXdByCl3QW8SgzrIKXdBryV3QQAAAACvJXfByCl3QW8SgzqWIXfB//////9/AID//////38AgP//////fwCA//////9/AIAAAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//v/9//3//fwCA/3//f/9/AID/f/9//38AgP9//3//fwCA////f/9//7////9//3//v////3//f/+/////f/9//7///////38AgP//////fwCA//////9/AID//////38AgA==")
+}]
+
+[sub_resource type="Shader" id="Shader_u77y1"]
+code = "shader_type spatial;
+render_mode cull_front, unshaded;
+
+uniform float width = 10.0;
+uniform bool debug = false;
+
+vec2 rotate90Degrees(vec2 v) {
+    return vec2(-v.y, v.x);
+}
+
+void vertex() {
+	vec4 clip_position = PROJECTION_MATRIX * (MODELVIEW_MATRIX * vec4(VERTEX, 1.0));
+	
+	vec4 position_with_offset = PROJECTION_MATRIX * (MODELVIEW_MATRIX * (vec4(VERTEX, 1.0) + vec4((2.*UV.x-.5) * NORMAL/100.0, 0.)));
+	vec2 offset_direction = position_with_offset.xy / position_with_offset.w - clip_position.xy / clip_position.w;
+	
+	vec2 offset = (rotate90Degrees(normalize(offset_direction * VIEWPORT_SIZE))) / VIEWPORT_SIZE * clip_position.w * width * 2.0;
+	POSITION = clip_position + vec4(offset, 0., 0.);
+}
+
+void fragment() {
+	float xLengthOnScreen = length(vec2(1.0/dFdx(UV).x, 1.0/dFdy(UV).x));
+	
+	float uvXStretch = length(vec2(dFdx(UV).x, dFdy(UV).x));
+	float uvYStretch = length(vec2(dFdx(UV).y, dFdy(UV).y));
+	
+	ALBEDO = COLOR.rgb;
+	
+	if (COLOR.a < 1.0) {
+		ALPHA = COLOR.a;
+	}
+	
+	if (debug) {
+		float xStretch = 2.0 * uvXStretch;
+		float yStretch = 2.0 * uvYStretch;
+		float diagStretch = 2.0 * length(vec2(dFdx(UV).y + dFdx(UV).x, dFdy(UV).y + dFdy(UV).x));
+		
+		ALBEDO = vec3(UV.x, UV.y, 0.0);
+		if (UV.x < xStretch || UV.x > 1.0 - xStretch || UV.y < yStretch || UV.y > 1.0 - yStretch || abs(UV.x - (1.-UV.y)) < diagStretch/2.0) {
+			ALBEDO = vec3(1.,1.,1.);
+		}	
+	}
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_q234s"]
+resource_local_to_scene = true
+render_priority = 0
+shader = SubResource("Shader_u77y1")
+shader_parameter/width = 10.304
+shader_parameter/debug = false
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_6woej"]
+_surfaces = [{
+"aabb": AABB(-16.8745, 0, -19.485, 33.75, 0.001, 29.2285),
+"attribute_data": PackedByteArray("+78A/wAAAAAAAIA/+78A/wAAgD8AAIA/+78A/wAAAAAAAAAA+78A/wAAgD8AAAAA+78A/wAAAAAAAIA/+78A/wAAgD8AAIA/+78A/wAAAAAAAAAA+78A/wAAgD8AAAAA+78A/wAAAAAAAIA/+78A/wAAgD8AAIA/+78A/wAAAAAAAAAA+78A/wAAgD8AAAAA+78A/wAAAAAAAIA/+78A/wAAgD8AAIA/+78A/wAAAAAAAAAA+78A/wAAgD8AAAAA"),
+"format": 34359742495,
+"index_count": 42,
+"index_data": PackedByteArray("AAABAAIAAgABAAMAAgADAAQABAADAAUABAAFAAYABgAFAAcABgAHAAgACAAHAAkACAAJAAoACgAJAAsACgALAAwADAALAA0ADAANAA4ADgANAA8A"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 16,
+"vertex_data": PackedByteArray("+v6GQQAAAABI4RtBBgGHQW8Sgzph5RtBs/ArJwAAAABI4ZvBbxKDOm8Sgzo835vBs/ArJwAAAABI4ZvBbxKDOm8Sgzo835vB+v6GwQAAAABI4RtB7vyGwW8Sgzph5RtB+v6GwQAAAABI4RtB7vyGwW8Sgzph5RtB+v6GQQAAAABI4RtBBgGHQW8Sgzph5RtB+v6GQQAAAABI4RtBBgGHQW8Sgzph5RtBevQAKAAAAABI4ZvBbxKDOm8Sgzo835vBAAAl0VJZgJ4AACXRUlmAngAAJdFSWYCeAAAl0VJZgJ4lUf9/rKaAniVR/3+spoCeJVH/f6ymgJ4lUf9/rKaAnv///3//f/+/////f/9//7////9//3//v////3//f/+/AAAl0VJZgJ4AACXRUlmAngAAJdFSWYCeAAAl0VJZgJ4=")
+}]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_pj123"]
+sky_top_color = Color(0.391974, 0.378214, 0.819851, 1)
+sky_horizon_color = Color(0.606717, 0.938473, 0.907229, 1)
+ground_bottom_color = Color(0.0901961, 0.027451, 0.109804, 1)
+ground_horizon_color = Color(0.76, 0.4028, 0.65284, 1)
+
+[sub_resource type="Sky" id="Sky_xc0y6"]
+sky_material = SubResource("ProceduralSkyMaterial_pj123")
+
+[sub_resource type="Environment" id="Environment_vqq6r"]
+background_mode = 2
+sky = SubResource("Sky_xc0y6")
+
+[node name="DemoScene" type="Node3D"]
+
+[node name="CameraAnimation" type="Node3D" parent="."]
+script = ExtResource("4_l381x")
+
+[node name="Camera3D" type="Camera3D" parent="CameraAnimation"]
+transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 178.777, 297.104)
+fov = 73.1
+near = 0.03
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.51265, -20.2804, 0.475967)
+size = Vector3(573.309, 39.0756, 102.969)
+
+[node name="Outline" type="MeshInstance3D" parent="CSGBox3D"]
+transform = Transform3D(6.39, 0, 0, 0, 3.45, 0, 0, 0, 1.125, 0.18924, -23.6928, -0.292213)
+material_override = SubResource("ShaderMaterial_vlbx6")
+mesh = SubResource("ArrayMesh_ngwho")
+skeleton = NodePath("../..")
+script = ExtResource("4_1bbda")
+radius = 63.03
+width = 4.638
+color = Color(0.737255, 0.737255, 0.737255, 1)
+points = PackedVector3Array(44.5689, 0, 44.5689, 44.5689, 0, -44.5689, -44.5689, 0, -44.5689, -44.5689, 0, 44.5689, 44.5689, 0, 44.5689, 44.5689, 0, -44.5689)
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="CSGBox3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.804047, 45.6447, -0.32209)
+size = Vector3(87.0376, 55.5806, 87.3291)
+
+[node name="Outline" type="MeshInstance3D" parent="CSGBox3D/CSGBox3D2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.088562, 28.8565, 0.534744)
+material_override = SubResource("ShaderMaterial_24txs")
+mesh = SubResource("ArrayMesh_j3l8r")
+skeleton = NodePath("../../..")
+script = ExtResource("4_1bbda")
+radius = 61.515
+width = 4.638
+color = Color(0.737255, 0.737255, 0.737255, 1)
+points = PackedVector3Array(43.4977, 0, 43.4977, 43.4977, 0, -43.4977, -43.4977, 0, -43.4977, -43.4977, 0, 43.4977, 43.4977, 0, 43.4977, 43.4977, 0, -43.4977)
+
+[node name="Outline2" type="MeshInstance3D" parent="CSGBox3D/CSGBox3D2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.088562, -25.1604, 0.534744)
+material_override = SubResource("ShaderMaterial_7pf85")
+mesh = SubResource("ArrayMesh_e2jsl")
+skeleton = NodePath("../../..")
+script = ExtResource("4_1bbda")
+radius = 63.03
+width = 4.638
+color = Color(0.737255, 0.737255, 0.737255, 1)
+points = PackedVector3Array(44.5689, 0, 44.5689, 44.5689, 0, -44.5689, -44.5689, 0, -44.5689, -44.5689, 0, 44.5689, 44.5689, 0, 44.5689, 44.5689, 0, -44.5689)
+
+[node name="ExampleShapes" type="Node3D" parent="."]
+
+[node name="Line3DAnimation" type="Node3D" parent="ExampleShapes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -225.601, 35.5271, 0)
+script = ExtResource("5_wyyr3")
+
+[node name="Line3D" type="MeshInstance3D" parent="ExampleShapes/Line3DAnimation"]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, -40.0213, -9.99506, 0)
+material_override = SubResource("ShaderMaterial_hi7qi")
+mesh = SubResource("ArrayMesh_r2uuq")
+skeleton = NodePath("../../..")
+script = ExtResource("4_wvuin")
+width = 4.0
+color = Color(0.733333, 0.937255, 0, 1)
+points = PackedVector3Array(0, 100, 0, 100, 0, 0, 200, 0, 0, 300, 100, 0, 400, 0, 0)
+
+[node name="Line3DUV" type="Node3D" parent="ExampleShapes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -109.736, 35.5271, 0)
+
+[node name="Line3D" type="MeshInstance3D" parent="ExampleShapes/Line3DUV"]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, -40.0212, -9.99506, 0)
+material_override = SubResource("ShaderMaterial_mj7li")
+mesh = SubResource("ArrayMesh_3dsv3")
+skeleton = NodePath("../../..")
+script = ExtResource("4_wvuin")
+width = 19.538
+color = Color(0.494854, 0.494855, 0.494854, 1)
+points = PackedVector3Array(0, 100, 0, 100, 0, 0, 200, 0, 0, 300, 100, 0, 400, 0, 0)
+debug = true
+
+[node name="HexagonAnimation" type="Node3D" parent="ExampleShapes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 105.707, 0)
+script = ExtResource("5_wyyr3")
+
+[node name="OuterHexagon" type="MeshInstance3D" parent="ExampleShapes/HexagonAnimation"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
+material_override = SubResource("ShaderMaterial_88vns")
+mesh = SubResource("ArrayMesh_yafu3")
+skeleton = NodePath("../../..")
+script = ExtResource("4_1bbda")
+sides = 6
+radius = 38.75
+color = Color(0, 0.882353, 0.929412, 1)
+points = PackedVector3Array(19.375, 0, 33.5585, 38.75, 0, 2.37267e-15, 19.375, 0, -33.5585, -19.375, 0, -33.5585, -38.75, 0, -7.11802e-15, -19.375, 0, 33.5585, 19.375, 0, 33.5585, 38.75, 0, 4.62803e-14)
+
+[node name="Node3D2" type="Node3D" parent="ExampleShapes/HexagonAnimation/OuterHexagon"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+script = ExtResource("5_wyyr3")
+
+[node name="InnerHexagon" type="MeshInstance3D" parent="ExampleShapes/HexagonAnimation/OuterHexagon/Node3D2"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
+material_override = SubResource("ShaderMaterial_imc7c")
+mesh = SubResource("ArrayMesh_lnfnl")
+skeleton = NodePath("../../../../..")
+script = ExtResource("4_1bbda")
+sides = 6
+radius = 24.775
+width = 2.0
+color = Color(0, 0.882353, 0.929412, 1)
+points = PackedVector3Array(0, 0, 24.775, 21.4558, 0, 12.3875, 21.4558, 0, -12.3875, 3.03396e-15, 0, -24.775, -21.4558, 0, -12.3875, -21.4558, 0, 12.3875, -6.06792e-15, 0, 24.775, 21.4558, 0, 12.3875)
+
+[node name="Square" type="Node3D" parent="ExampleShapes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 119.433, 46.877, 0)
+
+[node name="OuterSquare" type="MeshInstance3D" parent="ExampleShapes/Square"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
+material_override = SubResource("ShaderMaterial_d3uhu")
+mesh = SubResource("ArrayMesh_8xgh2")
+skeleton = NodePath("../../..")
+script = ExtResource("4_1bbda")
+radius = 41.11
+width = 1.0
+color = Color(0.929412, 0, 0.0156863, 1)
+points = PackedVector3Array(29.0692, 0, 29.0692, 29.0692, 0, -29.0692, -29.0692, 0, -29.0692, -29.0692, 0, 29.0692, 29.0692, 0, 29.0692, 29.0692, 0, -29.0692)
+
+[node name="InnerSquareAnimation" type="Node3D" parent="ExampleShapes/Square/OuterSquare"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+script = ExtResource("5_wyyr3")
+
+[node name="InnerSquare" type="MeshInstance3D" parent="ExampleShapes/Square/OuterSquare/InnerSquareAnimation"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
+material_override = SubResource("ShaderMaterial_qwgui")
+mesh = SubResource("ArrayMesh_x0hk1")
+skeleton = NodePath("../../../../..")
+script = ExtResource("4_1bbda")
+radius = 21.845
+width = 1.0
+color = Color(0.996078, 0.823529, 0.835294, 1)
+points = PackedVector3Array(15.4467, 0, 15.4467, 15.4467, 0, -15.4467, -15.4467, 0, -15.4467, -15.4467, 0, 15.4467, 15.4467, 0, 15.4467, 15.4467, 0, -15.4467)
+
+[node name="Triangle" type="Node3D" parent="ExampleShapes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 215.628, 46.877, 0)
+
+[node name="Triangle" type="MeshInstance3D" parent="ExampleShapes/Triangle"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+material_override = SubResource("ShaderMaterial_q234s")
+mesh = SubResource("ArrayMesh_6woej")
+skeleton = NodePath("../../..")
+script = ExtResource("4_1bbda")
+sides = 3
+radius = 19.485
+width = 10.304
+color = Color(0.984314, 0.74902, 0, 1)
+points = PackedVector3Array(16.8745, 0, 9.7425, 2.38615e-15, 0, -19.485, -16.8745, 0, 9.7425, 16.8745, 0, 9.7425, 7.15844e-15, 0, -19.485)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.252069, 0.622031, -0.741308, 0, 0.766044, 0.642788, 0.967709, -0.162027, 0.193096, 0, 0, 0)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_vqq6r")
