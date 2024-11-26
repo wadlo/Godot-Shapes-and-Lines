@@ -24,10 +24,15 @@ extends MeshInstance3D
 		regenerateMesh()
 
 func _ready() -> void:
+	if not Engine.is_editor_hint():
+		return
+		
 	mesh = ArrayMesh.new()
 	regenerateMesh()
 
 func regenerateMesh() -> void:
+	if not Engine.is_editor_hint():
+		return
 
 	var numPoints := points.size()
 	if numPoints <= 1:
