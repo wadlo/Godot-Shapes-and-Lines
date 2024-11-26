@@ -18,7 +18,7 @@ Clone this repository for an example
 
 # License
 
-All contents of this project and non-image files are licensed under the attached MIT license.
+All contents of this project are licensed under the attached MIT license.
 
 ### Attribution
 
