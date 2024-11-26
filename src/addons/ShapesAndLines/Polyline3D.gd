@@ -26,7 +26,7 @@ extends MeshInstance3D
 func _ready() -> void:
 	if not Engine.is_editor_hint():
 		return
-		
+
 	mesh = ArrayMesh.new()
 	regenerateMesh()
 
@@ -101,7 +101,7 @@ func regenerateMesh() -> void:
 	newSurfaceArray[Mesh.ARRAY_INDEX] = indices
 	newSurfaceArray[Mesh.ARRAY_COLOR] = colors
 
-	var material: Material = load("res://addons/ShapesAndLines/Polyline3DMaterial.tres").duplicate(true)
+	var material: Material = preload("res://addons/ShapesAndLines/Polyline3DMaterial.tres").duplicate(true)
 	material.set_shader_parameter("width", width)
 	material.set_shader_parameter("debug", debug)
 	var arrayMesh := mesh as ArrayMesh
