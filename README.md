@@ -4,7 +4,7 @@
 
 > [Join](https://discord.gg/Jyb4fKCbMq) the **GameDev Wizards** Discord server to get access to more game dev resources and show off your awesome creations!
 
-Godot Shapes and Lines is an addon that lets you easily render shapes and lines in 3d space. It is compatible with Godot 4.X. MIT licensed and free to use for both personal and commercial projects.
+Godot Shapes and Lines is an addon that lets you easily render shapes and lines in 3d space. It is compatible with Godot 4.x. MIT licensed and free to use for both personal and commercial projects.
 
 https://github.com/user-attachments/assets/ab0d221d-ba99-4aac-98f1-ca440bdb8a4e
 
